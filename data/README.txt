@@ -3,7 +3,7 @@
 #################################################################################
 
 pairs.Rdata contains the gene pairs for use in the AuPairWise method.
-There are 6 variables contained in the binary file.
+There are 6 variables in the binary file.
 The housekeeping interactions or stoichiometric pairs are contained in the "stoich.pairs" variable.
 All pairs are labelled by their human entrez gene ID.
 
