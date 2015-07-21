@@ -557,7 +557,7 @@ plot_roc2 <- function(scores,labels) {
 	return(cbind(fpr,tpr))
 }
 
-# Calculates and plots the ROC for a given list of scores(or ranks) and the known labels  
+# Calculates and plots the ROC for a given list of scores(or ranks) and the known labels
 plot_roc <- function(scores,labels, file)
 {
         rocs = get_roc_curve(scores, labels)

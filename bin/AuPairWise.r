@@ -85,7 +85,7 @@ run_APW <- function(exprs, out, stoich.pairs,  n.factors=c(0,1,2,5,10,15,25,50,1
 	for (n.factor in n.factors) {
 		tic()
 		repeats = list()
-		print("Noise factor: ", n.factor)
+		print(paste("Noise factor: ", n.factor))
 		shuff = sample(nS, n.repeats, replace=T)
 	        subS =  t(sapply((1:n.repeats), function(i) sort(sample(NN, nS))))
 	        repeats$noise = sapply((1:n.repeats), function(i) predict_sample(X[,subS[i,]], shuff[i], n.factor, x , nS, nX, filter) , simplify=F)
