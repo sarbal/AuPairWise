@@ -1,6 +1,7 @@
-#########################################
-#	Helper functions for noiseQC    #
-#########################################
+############################################
+#	Helper functions for AuPairWise    #
+############################################
+
 
 ##  Written: Sara Ballouz
 ##  Date: September 29th, 2014
@@ -389,11 +390,11 @@ write_out_summary <- function(out, results.all, length, pairs, n.factors, n.repe
 
 
 	# Predictions
-	stats = matrix(NA, ncol=nn, nrow=length, dimnames=list( pairs$labels, 1:nn /nn ) )
+	stats = matrix(NA, ncol=nn, nrow=length*2, dimnames=list( array(rbind( pairs$labels, "Random"), 1:nn /nn ) )
 	range = n.factors[-1]
 
 
-	for ( i in 1:length ){
+	for ( i in 1:(length*2) ){
 		temp = data$aurocs[i,][-1]
                 temp.se = data$aurocs.se[i,][-1]
 		temp.sd = data$aurocs.sd[i,][-1]

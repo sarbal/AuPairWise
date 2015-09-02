@@ -1,3 +1,7 @@
+#################################################################################################
+#	AuPairWise: A tool to assess biological replicability without using replicates		#
+#################################################################################################
+
 masterdir = "H:/AuPairWise/"
 source(paste(masterdir,"/bin/helper.R",sep=""))
 source(paste(masterdir,"/bin/AuPairWise.R",sep=""))

@@ -1,6 +1,6 @@
-#########################################
-#	AuPairWise for expression data  #
-#########################################
+#################################################################################################
+#	AuPairWise: A tool to assess biological replicability without using replicates		#
+#################################################################################################
 
 ##  Written: Sara Ballouz
 ##  Date: September 29th, 2014
@@ -9,7 +9,7 @@
 ##  Modified: August 13th 2015
 ## 	- Updated output to include p-value calculation
 ##  Modified: September 2nd 2015
-## 	- Updated output to return summary variable  
+## 	- Updated output to return summary variable
 
 
 run_APW <- function(exprs, out, stoich.pairs,  n.factors=c(0,1,2,5,10,15,20,25,50,100), n.repeats=10, dist ="other", mode ="post" , ranked=FALSE, labels.default="Stoichiometric pairs" ){
