@@ -66,6 +66,16 @@ be set in the ```run_APW()``` function, eg. ``` run_APW(exprs, out, stoich.pairs
 The p-valaue of the Wilcoxon rank sum test between the stoichiometric pairs and the random pairs for each noise factor are in ```summary$pvals```
 And finally, the estimated noise factors for any AUROC is given in: ``` summary$stats```
 
+|AUROCs|0|1|2|5|10|15|20|25|50|100|
+|---|---|---|---|---|---|---|---|---|---|---|
+|Stoichiometric pairs|0.59|0.59|0.54|0.58|0.82|0.90|0.99|0.99|1.00|1.00|
+|Random|0.59|0.49|0.55|0.59|0.74|0.79|0.88|0.95|1.00|1.00|
+
+
+|P-values|0|1|2|5|10|15|20|25|50|100|
+|---|---|---|---|---|---|---|---|---|---|---|
+|Ranksum test|0.9096|0.2242|1.0000|0.9698|0.1381|0.0598|0.0025|0.0246|NaN|NaN|
+
 #### b. Visualizing results:
 You can view the summary results with the ``` plot_summary_results(summary)``` function.
 
