@@ -12,7 +12,7 @@ AuPairWise: A tool to assess biological replicability without using replicates
 
 ### Summary
  AuPairWise is a tool to estimate how replicable your expression experiment/study is without using explicit replicates. 
-It uses a noise model to peturb a sample in your expression data, and then tests how this has affected the co-expression of gene pairs that are known to be coexpressed. The set of gene pairs are used as an indicator to determine the perturbed sample. How "well" they do this corresponds to the AUROC calculated. This is repeated over numerous runs and different levels of noise. The average AUROC for each noise level is returned. The equivalent experiment is performed concurrently on a random set of pairs, in order to establish a null for your expression data. If the random pairs perform equivalently, there is more correlated noise in your experiment.
+It uses a noise model to peturb a sample in your expression data, and then tests how this has affected the co-expression of gene pairs that are known to be coexpressed. The set of gene pairs are used as an indicator to determine the perturbed sample. The corresponding AUROC calculation is a measure of how "well" they do in this task. This is repeated over numerous runs and different levels of noise, and average AUROC is returned. The equivalent experiment is performed concurrently on a random set of pairs, in order to establish a null for your expression data. If the random pairs perform equivalently, there is more correlated noise in your experiment. This is reflected in the p-values that are calculated based on the distributions of the AUROCs of each run. 
 
 ![summary](https://github.com/sarbal/AuPairWise/blob/master/suppl/imgs/Fig9_new.png "Method summary")
 
