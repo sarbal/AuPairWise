@@ -5,6 +5,9 @@
 ##  Written: Sara Ballouz
 ##  Date: September 29th, 2014
 
+##  Updates:
+##  Date: September 2nd, 2015
+
 
 ## Necessary libraries
 library(MASS)
@@ -100,9 +103,13 @@ shuffle <- function( X, s, n.factor, dist="other", mode="post"){
 
 predict_sample <- function( X, s,n.factor, k, nS, nK, filter, dist="other", mode="post" ){
 
+	nX = dim(X)[1]
 	X.new  = shuffle(X,s, n.factor, dist,mode)
 	X.r    = t(apply (X.new,1,rank, ties.method="average", na.last="keep") )
 	Z.ranks = t(sapply( 1:nK, function(i) lm.studentized( X.r[k[i,1],],X.r[k[i,2],]), simplify=T ))
+
+	k2 = t(apply(all_pairs ( cbind(sample(nX,nK*2), sample(nX,nK*2))), 1, as.numeric))
+     	Z.ranks.r = t(sapply( 1:nK, function(i) lm.studentized( X.r[k2[i,1],],X.r[k2[i,2],]), simplify=T ))
 
 	ranks = matrix(unlist(Z.ranks) , ncol=nS, nrow=nK, byrow=F)
 	all = ranks == nS
@@ -111,13 +118,21 @@ predict_sample <- function( X, s,n.factor, k, nS, nK, filter, dist="other", mode
 	labels    = scores*0
 	labels[s] = 1
 
+        ranks.r = matrix(unlist(Z.ranks.r) , ncol=nS, nrow=nK, byrow=F)
+	all.r = ranks.r == nS
+
+	scores.r    = rank(colSums(all.r), ties.method="random")
+
+        scores = c(scores,scores.r)
 
 	if( !missing(filter)){
 		scores.filters =  list()
 
 		for (i in 1:(length(filter))){
                 	temp = rank(colSums(all[filter[[i]],]))
-                        scores.filters = c(scores.filters, temp)
+                        temp.r = rank(colSums(all.r[filter[[i]],]))
+
+                        scores.filters = c(scores.filters, temp, temp.r)
                 }
                 scores = unlist(scores.filters)
 	}
@@ -342,12 +357,13 @@ plot_stoich_cors <- function(out, length, filter, pairs, X){
 }
 
 
-write_out_summary <- function(out, results.all, length, pairs, n.factors, n.repeats, AUROC.default = 0.6){
-        
+write_out_summary <- function(out, results.all, length, pairs, n.factors, n.repeats, AUROC.default = 0.8, nn=100){
+
 	# Summary results
-	aurocs = matrix(0, nrow=length, ncol=length(n.factors), dimnames=list( pairs$labels,n.factors))
+	aurocs = matrix(0, nrow=length*2, ncol=length(n.factors), dimnames=list( array(rbind( pairs$labels, "Random") ) ,n.factors))
 	aurocs.sd = aurocs
 	aurocs.se = aurocs
+        pvals = matrix( 0, nrow=length, ncol=length(n.factors), dimnames=list( pairs$labels,n.factors) )
 
 	i = 1
 	for( n.factor in n.factors){
@@ -355,53 +371,83 @@ write_out_summary <- function(out, results.all, length, pairs, n.factors, n.repe
 		aurocs[,i] = rowMeans( data )
                 aurocs.sd[,i] = apply(data, 1,sd)
                 aurocs.se[,i] = aurocs.sd[,i]/sqrt(dim(data)[2])
+                pvals[,i] = sapply( (1:length)*2 -1, function(j) wilcox.test(data[j,], data[j+1,])$p.val )
                 i = i + 1
 
         }
+
         data = list()
         data$aurocs = aurocs
         data$aurocs.se = aurocs.se
         data$aurocs.sd = aurocs.sd
         data$n.factors = n.factors
+        data$pvals = pvals
 
 	write.table (data$aurocs, file = paste(out,".avg.aurocs.summary", sep=""))
-	write.table (data$aurocs.sd, file = paste(out,".avg.aurocs.summary", sep=""), append=T, col.names=F, row.names=paste(pairs$labels, "- SD"))
-	write.table (data$aurocs.se, file = paste(out,".avg.aurocs.summary", sep=""), append=T, col.names=F, row.names=paste(pairs$labels, "- SE"))
+	write.table (data$aurocs.sd, file = paste(out,".avg.aurocs.summary", sep=""), append=T, col.names=F, row.names=paste(array(rbind( pairs$labels, "Random") ), "- SD"))
+	write.table (data$aurocs.se, file = paste(out,".avg.aurocs.summary", sep=""), append=T, col.names=F, row.names=paste(array(rbind( pairs$labels, "Random") ), "- SE"))
+
 
 	# Predictions
-	stats = matrix(NA, ncol=10, nrow=length, dimnames=list( pairs$labels, 1:10 /10 ) )
+	stats = matrix(NA, ncol=nn, nrow=length, dimnames=list( pairs$labels, 1:nn /nn ) )
 	range = n.factors[-1]
+
+
 	for ( i in 1:length ){
 		temp = data$aurocs[i,][-1]
                 temp.se = data$aurocs.se[i,][-1]
 		temp.sd = data$aurocs.sd[i,][-1]
 
-		fit = glm( temp ~ range, family=binomial )
-	        predictions = predict(fit, data.frame(range=1:100),type = "response")
-	        for (j in 1:10){
-	        	AUROC = j/10
-			max.pred = max(which(predictions <= AUROC))
-	        	min.pred = min(which(predictions > AUROC))
-	        	n.pred = get_value_x( max.pred, min.pred, predictions[max.pred], predictions[min.pred], AUROC)
-	        	stats[i,j] = n.pred
+		predictions = approx( n.factors, data$aurocs[i,], n=nn)
+
+	        for (j in (nn/2):nn){
+	        	AUROC = j/nn
+			max.pred = max(which(predictions$y <= AUROC))
+	        	min.pred = min(which(predictions$y > AUROC))
+	        	n.pred = get_value_x( predictions$x[max.pred], predictions$x[min.pred], predictions$y[max.pred], predictions$y[min.pred], AUROC)
+   	        	stats[i,j] = n.pred
 	        }
-	        AUROC = AUROC.default
-                png( paste(out, ".predictions.", i,".png", sep="")  )
-		plot(log10(1:100), predictions, ylim=c(0.4,1), type="l", lwd=3, col="lightgrey", xlab="Noise factor", ylab="AUROC", axes=F)
-        	axis(2)
-        	axis(1, lab=range, at=log10(range) )
-        	abline(h= data$aurocs[1], lty=2, col="lightgrey", lwd=2)
-        	points( log10(range), temp, pch=19)
-        	abline( h = AUROC, lwd=3, lty=3, col=2)
-        	abline( v = log10(stats[i,6]), lwd=3, lty=3, col=2)
-		segments( log10(range), temp-temp.se, log10(range),temp+temp.se)
-		dev.off()
-	}
+
+        }
 
 	data$stats = stats
-	write.table (data$stats, file = paste(out,".avg.aurocs.predictions", sep="")  )
+	# write.table (data$stats, file = paste(out,".avg.aurocs.predictions", sep="")  )
 
+        save(data, results.all, file=paste(out,".avg.aurocs.Rdata", sep="") )
+        return(data)
 }
+
+
+plot_summary_results <- function(data, out, AUROC.default=0.8){
+	if( !missing(out) ){
+	        png( paste(out, ".predictions.png", sep="")  )
+	}
+
+        col.def = which(colnames(data$stats)==AUROC.default)
+
+	n = dim(data$aurocs)[1]
+
+	plot( log10(data$n.factors), data$aurocs[1,], ylim=c(0.4,1), type="l", lwd=3, col=0, xlab="Noise factor", ylab="AUROC", axes=F)
+        axis(2)
+        axis(1, lab=data$n.factors, at=log10(data$n.factors) )
+        cols = makeTransparent(colorpanel(n, "black", "lightgrey"),150)
+
+	for( i in 1:n){
+        	lines( log10(data$n.factors), data$aurocs[i,], lwd=3, col=cols[i])
+		segments(log10(data$n.factors), data$aurocs[i,]-data$aurocs.se[i,], log10(data$n.factors),data$aurocs[i,]+data$aurocs.se[i,],col=cols[i])
+        	points( log10(data$n.factors), data$aurocs[i,], pch=19,col=cols[i])
+        }
+
+	abline( h = AUROC.default, lwd=3, lty=3, col=2)
+        abline( v = log10(data$stats[1,col.def]), lwd=3, lty=3, col=2)
+	text(log10(max(data$n.factors)/2), 0.5, paste("For an AUROC of:", AUROC.default, "\nthe estimated noise factor is:\n", round(data$stats[1,col.def],1), "%") )
+        legend("topleft", legend=rownames(data$aurocs), col=cols, lwd=3, pch=19)
+
+	if( !missing(out) ){
+	       	dev.off()
+	}
+}
+
 
 get_gene_corrs <- function(X, m )
 {
@@ -543,7 +589,7 @@ roc_score <- function(scores,labels)
 # Calculates and plots the ROC for a given list of scores(or ranks) and the known labels
 plot_roc2 <- function(scores,labels) {
 	o = order(scores, decreasing=T)
-        
+
 	h1 = labels[o]
         h2 = !labels[o]
 
@@ -557,7 +603,7 @@ plot_roc2 <- function(scores,labels) {
 	return(cbind(fpr,tpr))
 }
 
-# Calculates and plots the ROC for a given list of scores(or ranks) and the known labels  
+# Calculates and plots the ROC for a given list of scores(or ranks) and the known labels
 plot_roc <- function(scores,labels, file)
 {
         rocs = get_roc_curve(scores, labels)
@@ -603,18 +649,6 @@ get_auc <- function(x,y){
         return (auc)
 }
 
-get_avgroc_curve <- function( rocs,n.repeats, n){
-
-	sum = matrix(0, ncol=2, nrow = n)
-	colnames(sum) = c("tpr", "fpr")
-	for( i in 1:n.repeats) {
-		sum = rocs[[i]] + sum
-	}
-	sum = sum/n.repeats
-        return(sum)
-}
-
-
 make_hist_matrix <- function(x1,y1){
 	x = sort(rep(x1,2))
         y = matrix(rbind(y1, y1))
@@ -649,13 +683,14 @@ all_pairs <- function(list){
 
 unique_all_pairs <- function(pairs){
 	list = pairs[[1]]
+	if( length(pairs) < 2 ) { return(list) }
+
 	for( i in 2:length(pairs)){
         	list = rbind(list,pairs[[i]])
 	}
 	list = unique(list)
 	return(list)
 }
-
 
 filter_pairs <- function(pairs, indices, length ){
 
