@@ -84,7 +84,5 @@ However, this should also be compared to the performances given by the random pa
 To run on a different list of gene pairs, modify the stoich.pairs variable.
 This a 2D matrix, the first column has gene A and second column gene B.
 These need to be entrez gene IDs, or must match the gene labels of your expresssion dataset.
-eg. ``` summary = run_APW(exprs, out, pairs ) ``` 
-
 
 
