@@ -1,4 +1,4 @@
-AuPairWise: tool for replicability estimation without replicates for expression data
+AuPairWise: A tool to assess biological replicability without using replicates
 ========
 
 # Code 
