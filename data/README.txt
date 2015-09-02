@@ -38,4 +38,8 @@ All pairs are labelled by their human entrez gene ID.
   - dimensions: 11218     3
   - First column is the protein complex identifier
   - Columns 2 and 3 are the gene IDs
+<<<<<<< HEAD
   - As with the multiple.complexes.pairs, but only the complexes with single pairs of genes.
+=======
+  - As with the multiple.complexes.pairs, but only the complexes with single pairs of genes.
+>>>>>>> origin/master
