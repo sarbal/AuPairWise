@@ -35,7 +35,8 @@ The row names should be labelled by their gene entrez IDs.
 The columns should be labelled by their sample IDs.
 The expression dataset should be placed in the variable: ``` exprs ``` 
 
-#### b. Another crucial element are the stoichiometric pairs, known to be coexpressed.
+#### b. Gene pairs 
+Another crucial element are the stoichiometric pairs, known to be coexpressed.
 These pairs are located in the file ``` pairs.Rdata ```, labelled as ``` stoich.pairs ```.
 They can be modified, but the variable must contain two columns, whereby each row
 contains a pair of genes, labelled by their entrez gene IDs.
@@ -92,7 +93,8 @@ However, this should also be compared to the performances given by the random pa
 ### 6. Extras
 #################################################################################################
 To run on a different list of gene pairs, modify the stoich.pairs variable.
-This a 2D matrix, the first column has gene A and second column gene B.
+This a matrix of gene pairs, the first column has gene A and second column gene B.
 These need to be entrez gene IDs, or must match the gene labels of your expresssion dataset.
 
+You can also combine multiple runs, but this requires some careful labelling of your output files. 
 
