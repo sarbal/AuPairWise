@@ -1,0 +1,20 @@
+#Example runs:
+
+# Regular run
+qsub ~/run_aupairwise_encode_qsub.sh 1 tech FALSE FALSE FALSE
+
+# TPM normalized
+qsub ~/run_aupairwise_encode_qsub.sh 1 norm TRUE FALSE FALSE
+
+# TMM normalized
+qsub ~/run_aupairwise_encode_qsub.sh 1 TMM TRUE FALSE FALSE
+
+# Rank the expression set
+qsub ~/run_aupairwise_encode_qsub.sh 1 tech TRUE FALSE FALSE
+
+# Run 2-fold CV
+qsub ~/run_aupairwise_encode_qsub.sh 1 tech TRUE FALSE multi
+
+# Run replicate analysis
+qsub ~/run_aupairwise_encode_qsub.sh 1 rep FALSE FALSE FALSE
+
