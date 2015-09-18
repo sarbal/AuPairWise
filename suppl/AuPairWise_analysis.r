@@ -2,6 +2,8 @@
 #	AuPairWise: A tool to assess biological replicability without using replicates		#
 #################################################################################################
 
+# Code for figures and analysis
+
 ##############################################################################################
 # Figure 1 : Tissue specific replication
 ##############################################################################################
@@ -25,8 +27,6 @@ xlab=paste(samples[i],"Liver mRNA - log2 FPKM"), ylab=paste(colnames(rsem)[i], "
 
 # To plot comparison  between liver expression and liver expression from the RNA-seq Atlas
 plot( log2(exprs[f1,i]), log2(atlas$liver[f2]), cex=0.5,main=round(cor(exprs[f1,i], atlas$liver[f2], use="pair", method="p"),3),sub=round(cor(exprs[f1,i], atlas$liver[f2], use="pair", method="s"),3) ,xlab=paste(samples[i], "Liver mRNA - log2 FPKM"), ylab="RNA-seq atlas, liver - log2 RPKM", bty="n", pch=19, col=makeTransparent(1))
-
-
 
 
 ##############################################################################################
@@ -297,8 +297,7 @@ abline(v=log2(minX), col=4, lty=3, lwd=3)
 #  Figure: AuPairWise on sample of RNA-seq experiments
 ##############################################################################################
 
-
-load(file="H:/AuPairWise/suppl/rnaseq_aurocs.Rdata")
+load(file="H:/AuPairWise/suppl/gemma_rnaseq_aurocs.Rdata")
 
 # Calculate predicted noise factor for AUROC shifts
 nn = 100
@@ -341,6 +340,7 @@ axis(4, at=(0:3), lab = 10^(0:3))
 
 
 # Plot the pvalues of a particular noise factor
+# eg. 
 filtN = finalQC[,3] == "25"
 plot( log10(as.numeric(finalQC[filtN,2])),  -log10( as.numeric(finalQC[filtN,6])), pch=19, xlab ="Sample size", ylab="-log 10 pval", axes=F)
 axis(1, at=(0:3), lab = 10^(0:3))
@@ -352,36 +352,91 @@ axis(2)
 ##############################################################################################
 #  Figure: Brainspan RNA-seq and microarray results
 ##############################################################################################
+colors = makeTransparent(colorpanel(15, "red", "blue"), 150))
+
+
+file="Y:/human/RNAseq/brainspan/qc_results_noise_update/brainspan.rna.sub.summary.Rdata")
+load(file)
+
+# ROC examples
+# eg.
+ns = 5
+i = 1
+j = 1
+k = 3
+        plot(c(0,1), c(0,1),  col="grey", type="l", lwd=2, xlim=c(0,1), ylim=c(0,1),xlab="FPR", ylab="TPR", bty="n")
+	for( n in 1:length(n.factors))  {
+                lines(results.all[[ns]][[i]]$rocs[[j]][[n]][[k]] ,lwd=3,col=(colors[n]))
+        }
+        legend( "bottomright", legend= n.factors, col=colors, lwd=3, bty="n")
+
+# Average AUROCS across sample sizes
+# eg.
+k = 3
+aurocs.ns = t(sapply( 1:length(nSs), function(ns) aurocs.all[[k]][ns,]))
+aurocs.ns.se = t(sapply( 1:length(nSs), function(ns) aurocs.se[[k]][ns,]))
+aurocs.ns.sd = t(sapply( 1:length(nSs), function(ns) aurocs.sd[[k]][ns,]))
+
+        plot( 0,0 , col=0, pch=19, bty="n", xlim=range(log10(nSs)), ylim=c(0.3,1),axes=F,xlab="Sample size", ylab="AUROC")
+	axis(2)
+        axis(1, lab=nSs, at=log10(nSs) )
+        for ( i in 1:length(n.factors) ){
+               	points( log10(nSs), aurocs.ns[,i] , col=colors[i], pch=19)
+		segments(log10(nSs), aurocs.ns[,i] - aurocs.ns.se[,i], log10(nSs), aurocs.ns[,i]+aurocs.ns.se[,i],col=colors[i])
+		fit = glm( aurocs.ns[,i] ~ log10(nSs), family=binomial(logit) )
+                lines(  log10(nSs), fit$fitted, lwd=2, col=makeTransparent(colors[i]))
+        }
+
+	legend( "topright", legend= n.factors, col=colors, lwd=2, bty="n")
+
+# Estimated noise for each AUROC shift
+# eg.
+k = 3
+aurocs.n = t(sapply( 1:length(n.factors), function(n) aurocs.all[[k]][,n]))
+aurocs.n.se = t(sapply( 1:length(n.factors), function(n) aurocs.se[[k]][,n]))
+aurocs.n.sd = t(sapply( 1:length(n.factors), function(n) aurocs.sd[[k]][,n]))
+
+j=1
+AUROCs= c(0.55,0.6,0.7,0.8,0.9 )
+n.preds = matrix(0, ncol = length(AUROCs), nrow = length(nSs) )
+for (AUROC in AUROCs){
+	for( i in 1:length(nSs)) {
+	        data = data.frame( n.factors = n.factors, aurocs = aurocs.n[,i], aurocs.se=aurocs.n.se[,i], aurocs.sd=aurocs.n.sd[,i] )
+	        fit = glm( aurocs ~ n.factors, data=data, family=binomial(logit))
+	        predictions = predict(fit, data.frame(n.factors = 1:100),type = "response")
+	        max.pred = max(which(predictions < AUROC))
+	        min.pred = min(which(predictions > AUROC))
+	        n.pred = get_value_x( max.pred, min.pred, predictions[max.pred], predictions[min.pred], AUROC)
+	        n.preds[i,j] = c( n.pred)
+	}
+	j = j+1
+}
+
+plot( 0, 0, ylim=range(log10(n.factors[-1])),xlim=range(log10(nSs)),type="l", lwd=3, col="lightgrey", xlab="Sample size", ylab="Noise", axes=F)
+axis(2,  lab=n.factors, at=log10(n.factors) )
+axis(1, lab=nSs, at=log10(nSs) )
+for(j in 1:5 ){
+	lines(log10(nSs), log10(n.preds[,j]), lwd=3, col=colors[j] )
+}
+legend( "topright", legend=AUROCs, col=colors, lwd=2, bty="n")
+
+
 
 # Plot RNA-seq brainspan results
-load("H:/AuPairWise/suppl/brainspan.rna.summary.Rdata")
-
-        range = n.factors[-1]
-
-	plot( log10(n.factors), aurocs.all[1,], pch= 19, col=0, ylim=c(0.4,1 ), xlab="Noise factor", ylab="AUROC", axes=F)
-	axis(2)
-	axis(1, lab=range, at=log10(range) )
-	for ( j in 1:2){
-		points(log10(n.factors), aurocs.all[j,], pch=19, col=cols3[j])
-		lines(log10(n.factors), aurocs.all[j,], lwd=2, col=cols3[j])
-		segments( log10(n.factors), aurocs.all[j,]-aurocs.se[j,], log10(n.factors),aurocs.all[j,]+aurocs.se[j,],col=cols3[j])
-	}
+plot_results("H:/AuPairWise/suppl/brainspan/brainspan.rna.summary.Rdata")
+plot_distributions("H:/AuPairWise/suppl/brainspan/brainspan.rna.summary.Rdata")
 
 # Get table of pvalues
+load("H:/AuPairWise/suppl/brainspan/brainspan.rna.summary.Rdata")
 pvals.rnseq = t(sapply(1:length(n.factors),  function(i) c(  wilcox.test( results.all[[i]]$aurocs[[1]], results.all[[i]]$aurocs[[2]])$p.val, mean(results.all[[i]]$aurocs[[1]]) , mean(results.all[[i]]$aurocs[[2]]) )))
 
 
 # Plot microarray brainspan results
-load("H:/AuPairWise/suppl/brainspan.micr.summary.Rdata")
-
-	for ( j in 1:2){
-		points(log10(n.factors), aurocs.all[j,], pch=19, col=cols3[j+2])
-		lines(log10(n.factors), aurocs.all[j,], lwd=2, col=cols3[j+2])
-		segments( log10(n.factors), aurocs.all[j,]-aurocs.se[j,], log10(n.factors),aurocs.all[j,]+aurocs.se[j,],col=cols3[j+2])
-	}
-	legend("bottomright", legend=c("RNAseq","RNAseq, random pairs", "Microarray","Microarray, random pairs"), col=cols3, pch=19)
+plot_results("H:/AuPairWise/suppl/brainspan/brainspan.micr.summary.Rdata")
+plot_distributions("H:/AuPairWise/suppl/brainspan/brainspan.micr.summary.Rdata")
 
 # Get table of pvalues
+load("H:/AuPairWise/suppl/brainspan/brainspan.micr.summary.Rdata")
 pvals.micr = t(sapply(1:length(n.factors),  function(i) c(  wilcox.test( results.all[[i]]$aurocs[[1]], results.all[[i]]$aurocs[[2]])$p.val, mean(results.all[[i]]$aurocs[[1]]) , mean(results.all[[i]]$aurocs[[2]]) )))
 
 
@@ -391,18 +446,30 @@ pvals.micr = t(sapply(1:length(n.factors),  function(i) c(  wilcox.test( results
 ##############################################################################################
 
 # RPKM
-load("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.rep.summary.Rdata")
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.between_reps_rseq.rep.summary.Rdata")
 # TPM
-load("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.normalized.summary.Rdata")
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.between_reps_rseq.normalized.summary.Rdata")
 # TMM
-load("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.TMM.summary.Rdata")
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.between_reps_rseq.TMM.summary.Rdata")
 # VST
-load("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.VST.summary.Rdata")
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.between_reps_rseq.VST.summary.Rdata")
 # Ranked
-load("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.ranked.summary.Rdata")
-
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.between_reps_rseq.ranked.summary.Rdata")
 # Randomized
-load("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.randomized.summary.Rdata")
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.between_reps_rseq.randomized.summary.Rdata")
+# Replicates
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.between_reps_rseq.XY.rep.summary.Rdata")
+# Replicates randomized
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.between_reps_rseq.XY.rep.randomized.summary.Rdata")
+
+# eg.
+plot_results(file)
+plot_distributions(file)
+
+
+##############################################################################################
+#  Functions: plotting results of AuPairWise
+##############################################################################################
 
 plot_results <- function(file,J=2){
         load(file)
@@ -416,13 +483,6 @@ plot_results <- function(file,J=2){
             segments( log10(n.factors), aurocs.all[j,]-aurocs.se[j,], log10(n.factors),aurocs.all[j,]+aurocs.se[j,],col=colors[j])
         }
 }
-plot_results("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.ranked.summary.Rdata")
-
-
-# Replicates
-load("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.XY.rep.summary.Rdata")
-# Replicates randomized
-load("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.XY.rep.randomized.summary.Rdata")
 
 plot_result <- function(file, j=1){
         load(file)
@@ -435,9 +495,26 @@ plot_result <- function(file, j=1){
         segments( log10(n.factors), aurocs.all-aurocs.se, log10(n.factors),aurocs.all+aurocs.se,col=colors[j])
 }
 
-plot_result("Y:/human/RNAseq/ENCODE/qc_results_extras/ENCODE.between_reps_rseq.XY.rep.summary.Rdata")
 
-
-
+plot_distributions <- function(file){
+        load(file)
+	for( j in 1:length(n.factors) ) {
+		aurocs1 = results.all[[j]]$aurocs[[1]]
+    		aurocs2 = results.all[[j]]$aurocs[[2]]
+    		h2 = get_density(hist(aurocs2, plot=F))
+		h1 = get_density(hist(aurocs1, plot=F))
+		m2 = round(mean(aurocs2),2)
+		m1 = round(mean(aurocs1),2)
+		pval = wilcox.test( aurocs2,aurocs1 )$p.val
+		    
+		plot(h1, type="l", lwd=3, xlim=c(0,1), sub = pval, main= n.factors[j], bty="n", xlab="Average AUROCs", ylab="Freq/density")
+		polygon(h1, col=makeTransparent(1))
+		polygon(h2, col=makeTransparent("grey"))
+		lines(h2, lwd=3, col="lightgrey")
+		abline(v=m1, lwd=3, lty=2)
+		abline(v=m2, lwd=3,lty=2, col="lightgrey")
+		legend("topleft", legend = c(m1,m2), col=c(1,"lightgrey"), lwd=3, lty=2)
+	}
+}
 
 
