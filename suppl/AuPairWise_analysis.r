@@ -128,7 +128,7 @@ abline(h = sum(filt.p)/P, lwd=3,col=colors[round(NN/3)], lty=3)
 #abline(v = log10(min(which(scores_test/P > 0.9))), lwd=3,col="lightgrey")
 
 
-load(file="H:/AuPairWise/suppl/series_2014.Rdata")
+load(file="H:/AuPairWise/suppl/GEO_series_2014.Rdata")
 
 # Calculate the fraction of replicable genes per experiment
 h = get_counts(hist(scores_test[all_exp_parsed[,2]]/P, plot=F, breaks=100 ))
@@ -340,7 +340,7 @@ axis(4, at=(0:3), lab = 10^(0:3))
 
 
 # Plot the pvalues of a particular noise factor
-# eg. 
+# eg.
 filtN = finalQC[,3] == "25"
 plot( log10(as.numeric(finalQC[filtN,2])),  -log10( as.numeric(finalQC[filtN,6])), pch=19, xlab ="Sample size", ylab="-log 10 pval", axes=F)
 axis(1, at=(0:3), lab = 10^(0:3))

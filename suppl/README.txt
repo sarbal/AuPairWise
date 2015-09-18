@@ -1,5 +1,5 @@
 ##############################################################################################
-# Supplementary data and code for AuPairWise paper 
+# Supplementary data and code for AuPairWise paper
 
 
 
@@ -26,7 +26,7 @@ Variables in file:
 ##############################################################################################
 GEO_series_2014.Rdata: GSE ids and sample size of SRA experiments in GEO dated until 2014
 Variables in file:
--
+- all_exp_parsed
 
 
 ##############################################################################################
