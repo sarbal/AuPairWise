@@ -467,6 +467,23 @@ plot_results(file)
 plot_distributions(file)
 
 
+# Centiles results
+file=("H:/AuPairWise/suppl/ENCODE/ENCODE.rseq.post.sample.18.all.aurocs.percentiles.spearman.abs.setsize.2665.Rdata")
+load(file)
+indices.nfactors  = 1:length(n.factors.sub)
+indices.nfactors  = c(1,6)
+
+plot( R,percentiles[R,1], pch=19, ylim=c(0.4,1), col=0, xlab="Centile", ylab="Average AUROCs" ) #main=paste(methods[im], "samples", nS[is])
+for( j in indices.nfactors ){
+    points( R, percentiles[,j], pch=19, col=makeTransparent(colors[j]))
+    #smooth = convolve_nets(R, percentiles[,j],20)
+    #lines(smooth,col=makeTransparent(colors[j]))
+    segments( R, percentiles[,j]-percentiles.se[,j], R, percentiles[,j]+percentiles.se[,j],col=makeTransparent(colors[j]))
+    #abline( h = mean( percentiles[,j]), col=makeTransparent(colors[j]))
+
+}
+
+
 ##############################################################################################
 #  Functions: plotting results of AuPairWise
 ##############################################################################################
