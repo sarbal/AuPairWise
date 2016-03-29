@@ -19,7 +19,7 @@ if( missing(out) ) {
 
 # Load helper files and stoichiometric pairs
 source(paste(masterdir,"/bin/helper.R",sep=""))
-source(paste(masterdir,"/bin/AuPairWise.R",sep=""))
+source(paste(masterdir,"/bin/AuPairWise.r",sep=""))
 load(paste(masterdir,"/data/pairs.Rdata",sep=""))
 
 # Run AuPairWise
