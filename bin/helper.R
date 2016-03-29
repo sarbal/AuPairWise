@@ -390,7 +390,7 @@ write_out_summary <- function(out, results.all, length, pairs, n.factors, n.repe
 
 
 	# Predictions
-	stats = matrix(NA, ncol=nn, nrow=length*2, dimnames=list( array(rbind( pairs$labels, "Random"), 1:nn /nn ) )
+	stats = matrix(NA, ncol=nn, nrow=length*2, dimnames=list( array(rbind( pairs$labels, "Random"), 1:nn /nn )))
 	range = n.factors[-1]
 
 
@@ -399,16 +399,16 @@ write_out_summary <- function(out, results.all, length, pairs, n.factors, n.repe
                 temp.se = data$aurocs.se[i,][-1]
 		temp.sd = data$aurocs.sd[i,][-1]
 
-<<<<<<< HEAD
-		predictions = approx( n.factors, data$aurocs[i,], n=nn)
-
-	        for (j in (nn/2):nn){
-	        	AUROC = j/nn
-			max.pred = max(which(predictions$y <= AUROC))
-	        	min.pred = min(which(predictions$y > AUROC))
-	        	n.pred = get_value_x( predictions$x[max.pred], predictions$x[min.pred], predictions$y[max.pred], predictions$y[min.pred], AUROC)
-   	        	stats[i,j] = n.pred
-=======
+#<<<<<<< HEAD
+#		predictions = approx( n.factors, data$aurocs[i,], n=nn)
+#
+#	        for (j in (nn/2):nn){
+#	        	AUROC = j/nn
+#			max.pred = max(which(predictions$y <= AUROC))
+#	        	min.pred = min(which(predictions$y > AUROC))
+#	        	n.pred = get_value_x( predictions$x[max.pred], predictions$x[min.pred], predictions$y[max.pred], predictions$y[min.pred], AUROC)
+#   	        	stats[i,j] = n.pred
+#=======
 		fit = glm( temp ~ range, family=binomial) #  Default family
 	        predictions = predict(fit, data.frame(range=1:100),type = "response")
 	        for (j in 1:10){
@@ -417,7 +417,7 @@ write_out_summary <- function(out, results.all, length, pairs, n.factors, n.repe
 	        	min.pred = min(which(predictions > AUROC))
 	        	n.pred = get_value_x( max.pred, min.pred, predictions[max.pred], predictions[min.pred], AUROC)
 	        	stats[i,j] = n.pred
->>>>>>> origin/master
+#>>>>>>> origin/master
 	        }
 
         }
