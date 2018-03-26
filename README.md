@@ -1,6 +1,9 @@
 AuPairWise: A tool to assess biological replicability without using replicates
 ========
 
+## Paper: 
+Ballouz S, Gillis J (2016) AuPairWise: A Method to Estimate RNA-Seq Replicability through Co-expression. PLoS Comput Biol 12(4): e1004868. https://doi.org/10.1371/journal.pcbi.1004868
+
 ### Code 
 - bin/run_on_sample_data.R : demonstration 
 - bin/AuPairWise.R : a script to test the quality of your RNAseq experiment
