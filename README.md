@@ -19,17 +19,17 @@ It uses a noise model to peturb a sample in your expression data, and then tests
 
 ![summary](https://github.com/sarbal/AuPairWise/blob/master/suppl/imgs/Fig9_new.png "Method summary")
 
-#################################################################################################
+###########################################################################################
 ### 1. Setting up the environment
-#################################################################################################
+###########################################################################################
 
 You first need to label the directory you have saved AuPairWise in: eg. ``` masterdir="C:/AuPairWise/" ```
 And label your experiment: eg. ``` name = "my_experiment" ```
 All output will be saved in: ``` out = paste(masterdir,name,sep="/") ```
 
-#################################################################################################
+###########################################################################################
 ### 2. Expression data
-#################################################################################################
+###########################################################################################
 
 #### a. To run AuPairWise, you need an expression dataset.
 Currently, we have not implemented any pre-processing steps, so please make sure that the data is
@@ -44,9 +44,9 @@ These pairs are located in the file ``` pairs.Rdata ```, labelled as ``` stoich.
 They can be modified, but the variable must contain two columns, whereby each row
 contains a pair of genes, labelled by their entrez gene IDs.
 
-#################################################################################################
+###########################################################################################
 ### 3. Running AuPairWise
-#################################################################################################
+###########################################################################################
 
 Once the environment variables and the expression data is loaded, you can run the
 script ``` run_AuPairWise_on_data.R ``` :
@@ -56,9 +56,9 @@ The default repeats is set to 10, but we recommend 100 or 1000. However, this ta
 more time. The process can be split up and parallelized but this is currently not implemented.
 
 
-#################################################################################################
+###########################################################################################
 ### 4. Output summary
-#################################################################################################
+###########################################################################################
 
 #### a. Results:
 The output of the ``` run_APW()``` function is a list that contains 6 elements. Here, we've named it summary.
@@ -85,16 +85,16 @@ You can view the summary results with the ``` plot_summary_results(summary)``` f
 
 ![Sample output](https://github.com/sarbal/AuPairWise/blob/master/suppl/imgs/summary_encode.png "Sample output")
  
-#################################################################################################
+###########################################################################################
 ### 5. Intepreting results
-#################################################################################################
+###########################################################################################
 A low noise factor implies that your experiment 'replicates' the coexpression patterns expected well
 enough to be detected by small perturbations.
 However, this should also be compared to the performances given by the random pairs.
 
-#################################################################################################
+###########################################################################################
 ### 6. Extras
-#################################################################################################
+###########################################################################################
 To run on a different list of gene pairs, modify the stoich.pairs variable.
 This a matrix of gene pairs, the first column has gene A and second column gene B.
 These need to be entrez gene IDs, or must match the gene labels of your expresssion dataset.
