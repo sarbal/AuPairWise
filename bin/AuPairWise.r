@@ -18,31 +18,31 @@ run_APW <- function(exprs, out, stoich.pairs,  n.factors=c(0,1,2,5,10,15,20,25,5
 	X = exprs
 
 	# Remove samples with no expression data
-        filterout = colSums(X) != 0
+    filterout = colSums(X) != 0
 	X = X[,filterout]
 
 	# Remove genes with too few counts
 	X[which( log10(X) < -5 )] = 0
 
 	# Set up variables
-        NN = dim(X)[2]    		# Number of samples
+    NN = dim(X)[2]    		# Number of samples
 	N = dim(X)[1]     		# Number of genes/transcripts
 	S = 1:NN          		# Indices for samples
 	nS = NN                         # If subsampling, currently not implemented
 
 	# Visualize data so far
-        plot_cummulative_counts(out, X)
+    plot_cummulative_counts(out, X)
 
-        # Transform to log2
-        Med <- median(X, na.rm = T)
+    # Transform to log2
+    Med <- median(X, na.rm = T)
 	if (Med > 16) X <- model.fx(X, log2)
 
 	# Transform data
 	if( ranked == T){
 		X = apply(X, 2 ,rank, ties.method="average", na.last="keep")
 		colnames(X) = samples.list
-        	rownames(X) = genes.list
-        	out=paste(out, "ranked", sep=".")
+        rownames(X) = genes.list
+        out=paste(out, "ranked", sep=".")
 		plot_cummulative_counts(out, X)
 	}
 
@@ -52,7 +52,7 @@ run_APW <- function(exprs, out, stoich.pairs,  n.factors=c(0,1,2,5,10,15,20,25,5
 	plot_expression_props(out, m.X, sd.X)
 
 	# Update data
-        genes.list = rownames(X)
+    genes.list = rownames(X)
 	samples.list = colnames(X)
 
 	# Adjust list of pairs
@@ -60,20 +60,20 @@ run_APW <- function(exprs, out, stoich.pairs,  n.factors=c(0,1,2,5,10,15,20,25,5
 	pairs$stoich = all_pairs(stoich.pairs)
 	pairs$all    = unique_all_pairs( pairs )
 	pairs$labels = labels.default
-        length       = length(pairs$labels)
+    length       = length(pairs$labels)
 
 
 	# Get indices of pairs
-        indices =  get_indices_stoich_pairs(pairs$all, genes.list)
+    indices =  get_indices_stoich_pairs(pairs$all, genes.list)
 	indices.stoich = get_indices_stoich_pairs(pairs$stoich, genes.list)
-        nK = length(indices$x1)
-        genes.stoich = sort(unique(c(indices.stoich$x1, indices.stoich$x2)))
-        k = cbind( indices$x1, indices$x2)
+    nK = length(indices$x1)
+    genes.stoich = sort(unique(c(indices.stoich$x1, indices.stoich$x2)))
+    k = cbind( indices$x1, indices$x2)
 
 	filter = filter_pairs(pairs, indices,length)
 	plot_expression_props(out, m.X, sd.X,genes.stoich)
 
-        # Plot correlation distributions of pairs
+    # Plot correlation distributions of pairs
 	# plot_stoich_cors(out, length, filter, pairs, X)
 
 
@@ -81,7 +81,7 @@ run_APW <- function(exprs, out, stoich.pairs,  n.factors=c(0,1,2,5,10,15,20,25,5
 	results.all = list()
 	r = 1
 	for (n.factor in n.factors) {
-		tic()
+		#tic()
 		repeats = list()
 		print(paste("Noise factor: ", n.factor))
 		shuff = sample(nS, n.repeats, replace=T)
@@ -108,7 +108,7 @@ run_APW <- function(exprs, out, stoich.pairs,  n.factors=c(0,1,2,5,10,15,20,25,5
 		# Store results
 		results.all[[r]]= repeats
 		r = r + 1
-		toc()
+		# toc()
 	}
 
 
